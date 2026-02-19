@@ -1,0 +1,107 @@
+name: Playwright + Cucumber Tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    # Run tests daily at 2 AM UTC
+    - cron: '0 2 * * *'
+
+jobs:
+  test:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+        node-version: [18.x, 20.x]
+        site: [site1, site2]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Run tests - ${{ matrix.browser }} - ${{ matrix.site }}
+        run: npm test
+        env:
+          NODE_ENV: ci
+          BROWSER: ${{ matrix.browser }}
+          SITE: ${{ matrix.site }}
+          ENV: staging
+
+      - name: Generate Allure Report
+        if: always()
+        run: npm run report:html
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results-${{ matrix.browser }}-${{ matrix.site }}-node-${{ matrix.node-version }}
+          path: test-results
+          retention-days: 30
+
+      - name: Upload allure results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: allure-results-${{ matrix.browser }}-${{ matrix.site }}-node-${{ matrix.node-version }}
+          path: allure-results
+          retention-days: 7
+
+  # Job to publish test results
+  publish-results:
+    name: Publish Test Results
+    if: always()
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v3
+
+      - name: Publish test results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          files: '**/cucumber-report.json'
+          check_name: Cucumber Test Results
+
+  # Job to check code quality
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linter
+        run: npm run lint
+
+      - name: Run format check
+        run: npm run format -- --check

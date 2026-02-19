@@ -1,0 +1,64 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "username": "john.doe",
+      "email": "john.doe@example.com",
+      "firstName": "John",
+      "lastName": "Doe",
+      "role": "admin"
+    },
+    {
+      "id": 2,
+      "username": "jane.smith",
+      "email": "jane.smith@example.com",
+      "firstName": "Jane",
+      "lastName": "Smith",
+      "role": "user"
+    },
+    {
+      "id": 3,
+      "username": "test.user",
+      "email": "test.user@example.com",
+      "firstName": "Test",
+      "lastName": "User",
+      "role": "user"
+    }
+  ],
+  "products": [
+    {
+      "id": 101,
+      "name": "Product 1",
+      "category": "Electronics",
+      "price": 99.99
+    },
+    {
+      "id": 102,
+      "name": "Product 2",
+      "category": "Clothing",
+      "price": 49.99
+    },
+    {
+      "id": 103,
+      "name": "Product 3",
+      "category": "Books",
+      "price": 29.99
+    }
+  ],
+  "orders": [
+    {
+      "id": 1001,
+      "userId": 1,
+      "productId": 101,
+      "quantity": 2,
+      "status": "completed"
+    },
+    {
+      "id": 1002,
+      "userId": 2,
+      "productId": 102,
+      "quantity": 1,
+      "status": "pending"
+    }
+  ]
+}

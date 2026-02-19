@@ -1,0 +1,7 @@
+node_modules;
+npm - debug.log.git.gitignore;
+README.md.env.env.example;
+test - results;
+allure - results;
+allure - report.auth.DS_Store.vscode.idea.playwright;
+videos;

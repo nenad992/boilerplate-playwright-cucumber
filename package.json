@@ -1,0 +1,53 @@
+{
+  "name": "boilerplate-playwright-cucumber",
+  "version": "1.0.0",
+  "description": "Comprehensive Playwright + Cucumber (BDD) E2E Testing Boilerplate with Page Object Model, Multi-site Support, Hooks, and Data-driven Scenarios",
+  "author": "Your Team",
+  "license": "MIT",
+  "scripts": {
+    "test": "cucumber-js --require-module @babel/register --require src/step-definitions --require src/hooks",
+    "test:headed": "HEADED=true cucumber-js --require-module @babel/register --require src/step-definitions --require src/hooks",
+    "test:debug": "DEBUG=true cucumber-js --require-module @babel/register --require src/step-definitions --require src/hooks",
+    "test:chrome": "BROWSER=chromium cucumber-js --require-module @babel/register --require src/step-definitions --require src/hooks",
+    "test:firefox": "BROWSER=firefox cucumber-js --require-module @babel/register --require src/step-definitions --require src/hooks",
+    "test:safari": "BROWSER=webkit cucumber-js --require-module @babel/register --require src/step-definitions --require src/hooks",
+    "test:smoke": "cucumber-js --require-module @babel/register --require src/step-definitions --require src/hooks --tags @smoke",
+    "test:regression": "cucumber-js --require-module @babel/register --require src/step-definitions --require src/hooks --tags @regression",
+    "test:critical": "cucumber-js --require-module @babel/register --require src/step-definitions --require src/hooks --tags @critical",
+    "test:site1": "SITE=site1 cucumber-js --require-module @babel/register --require src/step-definitions --require src/hooks",
+    "test:site2": "SITE=site2 cucumber-js --require-module @babel/register --require src/step-definitions --require src/hooks",
+    "test:parallel": "cucumber-js --require-module @babel/register --require src/step-definitions --require src/hooks --parallel 4",
+    "test:dev": "ENV=dev cucumber-js --require-module @babel/register --require src/step-definitions --require src/hooks",
+    "test:staging": "ENV=staging cucumber-js --require-module @babel/register --require src/step-definitions --require src/hooks",
+    "test:prod": "ENV=prod cucumber-js --require-module @babel/register --require src/step-definitions --require src/hooks",
+    "report:html": "cucumber-js --require-module @babel/register --require src/step-definitions --require src/hooks --format html:test-results/cucumber-report.html",
+    "report:json": "cucumber-js --require-module @babel/register --require src/step-definitions --require src/hooks --format json:test-results/cucumber-report.json",
+    "report:allure": "allure generate allure-results --clean -o allure-report",
+    "report:open": "allure open allure-report",
+    "lint": "eslint src --fix",
+    "format": "prettier --write \"src/**/*.js\" \"features/**/*.feature\"",
+    "install:browsers": "npx playwright install",
+    "clean": "rm -rf test-results allure-results allure-report .auth",
+    "pretest": "npm run lint"
+  },
+  "dependencies": {
+    "@cucumber/cucumber": "^9.5.1",
+    "@playwright/test": "^1.48.0",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.23.6",
+    "@babel/preset-env": "^7.23.6",
+    "@babel/register": "^7.23.7",
+    "@cucumber/pretty-formatter": "^1.0.0",
+    "allure-commandline": "^2.25.0",
+    "cross-env": "^7.0.3",
+    "eslint": "^8.57.0",
+    "eslint-plugin-playwright": "^0.15.3",
+    "prettier": "^3.3.2"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}
