@@ -11,7 +11,7 @@ class AssertionHelper {
   static async assertElementVisible(page, selector) {
     const element = await page.$(selector);
     expect(element).not.toBeNull();
-    expect(await element.isVisible()).toBeTruthy();
+    await expect(element).toBeVisible();
   }
 
   /**
@@ -20,7 +20,7 @@ class AssertionHelper {
   static async assertElementNotVisible(page, selector) {
     const element = await page.$(selector);
     if (element) {
-      expect(await element.isVisible()).toBeFalsy();
+      await expect(element).toBeHidden();
     }
   }
 
@@ -92,7 +92,7 @@ class AssertionHelper {
   static async assertElementEnabled(page, selector) {
     const element = await page.$(selector);
     expect(element).not.toBeNull();
-    expect(await element.isEnabled()).toBeTruthy();
+    await expect(element).toBeEnabled();
   }
 
   /**
@@ -101,7 +101,7 @@ class AssertionHelper {
   static async assertElementDisabled(page, selector) {
     const element = await page.$(selector);
     expect(element).not.toBeNull();
-    expect(await element.isDisabled()).toBeTruthy();
+    await expect(element).toBeDisabled();
   }
 
   /**
@@ -110,7 +110,7 @@ class AssertionHelper {
   static async assertElementChecked(page, selector) {
     const element = await page.$(selector);
     expect(element).not.toBeNull();
-    expect(await element.isChecked()).toBeTruthy();
+    await expect(element).toBeChecked();
   }
 
   /**
@@ -119,7 +119,7 @@ class AssertionHelper {
   static async assertElementNotChecked(page, selector) {
     const element = await page.$(selector);
     expect(element).not.toBeNull();
-    expect(await element.isChecked()).toBeFalsy();
+    await expect(element).not.toBeChecked();
   }
 
   /**

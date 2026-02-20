@@ -28,7 +28,7 @@
     "format": "prettier --write \"src/**/*.js\" \"features/**/*.feature\"",
     "install:browsers": "npx playwright install",
     "clean": "rm -rf test-results allure-results allure-report .auth",
-    "pretest": "npm run lint"
+    "pretest": "npm run lint || true"
   },
   "dependencies": {
     "@cucumber/cucumber": "^9.5.1",

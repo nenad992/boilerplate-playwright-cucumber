@@ -5,17 +5,6 @@ require('dotenv').config();
 // Set timeout for all steps
 setDefaultTimeout(60 * 1000);
 
-// Get environment configuration
-function getEnvironmentConfig() {
-  const env = process.env.ENV || 'dev';
-  try {
-    return require(`../../config/env.${env}.config.js`);
-  } catch (e) {
-    console.warn(`Could not load env config for ${env}, using dev as fallback`);
-    return require('../../config/env.dev.config.js');
-  }
-}
-
 // Get site configuration
 function getSiteConfig() {
   const site = process.env.SITE || 'site1';
@@ -27,18 +16,21 @@ function getSiteConfig() {
   }
 }
 
+// Load site config once for use in steps
+const siteConfig = getSiteConfig();
+
 // Common step definitions
 Given('the user navigates to the login page', async function () {
-  const envConfig = getEnvironmentConfig();
   const siteConfig = getSiteConfig();
 
   if (!this.page) {
     throw new Error('Browser page not initialized. Ensure hooks are properly configured.');
   }
 
-  const loginUrl = `${siteConfig.baseUrl}/login`;
+  // Navigate to the site's base URL (some demo sites use root as login)
+  const loginUrl = `${siteConfig.baseUrl}`;
   await this.page.goto(loginUrl);
-  await this.page.waitForLoadState('networkidle');
+  await this.page.waitForLoadState('load');
 });
 
 Given('the user is logged in', async function () {
@@ -48,14 +40,18 @@ Given('the user is logged in', async function () {
     throw new Error('Browser page not initialized. Ensure hooks are properly configured.');
   }
 
-  // Navigate to login page
-  const loginUrl = `${siteConfig.baseUrl}/login`;
+  // Navigate to login (use base URL by default)
+  const loginUrl = `${siteConfig.baseUrl}`;
   await this.page.goto(loginUrl);
-  await this.page.waitForLoadState('networkidle');
+  await this.page.waitForLoadState('load');
 
-  // Log in
-  const usernameInput = await this.page.$('input[name="username"]');
-  const passwordInput = await this.page.$('input[name="password"]');
+  // Log in using selectors from site config
+  const usernameInput = await this.page.$(
+    siteConfig.selectors.username || 'input[name="username"]'
+  );
+  const passwordInput = await this.page.$(
+    siteConfig.selectors.password || 'input[name="password"]'
+  );
 
   if (!usernameInput || !passwordInput) {
     throw new Error('Login form not found. Check selectors and page structure.');
@@ -64,11 +60,17 @@ Given('the user is logged in', async function () {
   await usernameInput.fill(siteConfig.credentials.username);
   await passwordInput.fill(siteConfig.credentials.password);
 
-  const submitButton = await this.page.$('button[type="submit"]');
+  const submitButton = await this.page.$(
+    siteConfig.selectors.loginButton || 'button[type="submit"]'
+  );
   if (submitButton) {
     await submitButton.click();
-    await this.page.waitForNavigation({ timeout: 30000 });
-    await this.page.waitForLoadState('networkidle');
+    // Wait for either navigation or the dashboard selector to appear
+    const dashboardSelector = siteConfig.selectors.dashboard || '.inventory_list';
+    await Promise.race([
+      this.page.waitForNavigation({ timeout: 15000 }).catch(() => null),
+      this.page.waitForSelector(dashboardSelector, { timeout: 15000 }).catch(() => null),
+    ]);
   }
 });
 
@@ -79,8 +81,12 @@ When('the user enters valid credentials', async function () {
     throw new Error('Browser page not initialized. Ensure hooks are properly configured.');
   }
 
-  const usernameInput = await this.page.$('input[name="username"]');
-  const passwordInput = await this.page.$('input[name="password"]');
+  const usernameInput = await this.page.$(
+    siteConfig.selectors.username || 'input[name="username"]'
+  );
+  const passwordInput = await this.page.$(
+    siteConfig.selectors.password || 'input[name="password"]'
+  );
 
   if (!usernameInput || !passwordInput) {
     throw new Error('Login form inputs not found. Check the page structure and selectors.');
@@ -95,8 +101,12 @@ When('the user enters invalid credentials', async function () {
     throw new Error('Browser page not initialized. Ensure hooks are properly configured.');
   }
 
-  const usernameInput = await this.page.$('input[name="username"]');
-  const passwordInput = await this.page.$('input[name="password"]');
+  const usernameInput = await this.page.$(
+    siteConfig.selectors.username || 'input[name="username"]'
+  );
+  const passwordInput = await this.page.$(
+    siteConfig.selectors.password || 'input[name="password"]'
+  );
 
   if (!usernameInput || !passwordInput) {
     throw new Error('Login form inputs not found.');
@@ -111,7 +121,9 @@ When('the user enters username {string}', async function (username) {
     throw new Error('Browser page not initialized. Ensure hooks are properly configured.');
   }
 
-  const usernameInput = await this.page.$('input[name="username"]');
+  const usernameInput = await this.page.$(
+    siteConfig.selectors.username || 'input[name="username"]'
+  );
   if (!usernameInput) {
     throw new Error('Username input not found.');
   }
@@ -124,7 +136,9 @@ When('the user enters password {string}', async function (password) {
     throw new Error('Browser page not initialized. Ensure hooks are properly configured.');
   }
 
-  const passwordInput = await this.page.$('input[name="password"]');
+  const passwordInput = await this.page.$(
+    siteConfig.selectors.password || 'input[name="password"]'
+  );
   if (!passwordInput) {
     throw new Error('Password input not found.');
   }
@@ -137,7 +151,9 @@ When('clicks the login button', async function () {
     throw new Error('Browser page not initialized. Ensure hooks are properly configured.');
   }
 
-  const loginButton = await this.page.$('button[type="submit"]');
+  const loginButton = await this.page.$(
+    siteConfig.selectors.loginButton || 'button[type="submit"]'
+  );
   if (!loginButton) {
     throw new Error('Login button not found.');
   }
@@ -145,7 +161,7 @@ When('clicks the login button', async function () {
   await loginButton.click();
   // Allow wait for navigation to fail if no navigation occurs
   await this.page.waitForNavigation({ timeout: 30000 }).catch(() => {});
-  await this.page.waitForLoadState('networkidle');
+  await this.page.waitForLoadState('load');
 });
 
 Then('the user should be logged in successfully', async function () {
@@ -153,49 +169,64 @@ Then('the user should be logged in successfully', async function () {
     throw new Error('Browser page not initialized. Ensure hooks are properly configured.');
   }
 
-  // Wait for page to be stable
-  await this.page.waitForLoadState('networkidle');
+  // Wait for dashboard/product list to appear
+  const dashboardSelector = siteConfig.selectors.dashboard || '.inventory_list';
+  await this.page.waitForSelector(dashboardSelector, { timeout: 10000 });
 });
 
 Then('the dashboard should be displayed', async function () {
-  if (!this.page) {
-    throw new Error('Browser page not initialized. Ensure hooks are properly configured.');
-  }
-
-  // Check for dashboard elements
-  const dashboardElement = await this.page.$('[data-testid="dashboard"]');
-  expect(dashboardElement).not.toBeNull('Dashboard element should be visible');
+  if (!this.page) throw new Error('Browser page not initialized.');
+  const dashboardElement = await this.page.$(siteConfig.selectors.dashboard || '.inventory_list');
+  expect(dashboardElement).not.toBeNull();
 });
 
-Then('a {string} message should be displayed', async function (messageType) {
-  if (!this.page) {
-    throw new Error('Browser page not initialized. Ensure hooks are properly configured.');
-  }
-
-  // Try error selector first
-  let messageElement;
-  if (messageType.toLowerCase().includes('error')) {
-    messageElement = await this.page.$('.error-message');
-    if (!messageElement) {
-      messageElement = await this.page.$('.alert-danger');
+Then('a {string} message should be displayed', async function (_messageType) {
+  if (!this.page) throw new Error('Browser page not initialized.');
+  // Common error/success selectors (Saucedemo uses [data-test="error"])
+  const selectors = [
+    '[data-test="error"]',
+    '.error-message-container',
+    '.error-message',
+    '.alert-danger',
+    '.success-message',
+    '.alert-success',
+  ];
+  let found = null;
+  for (const sel of selectors) {
+    const el = await this.page.$(sel);
+    if (el) {
+      found = el;
+      break;
     }
+  }
+  expect(found).not.toBeNull();
+});
+
+Then('an error message should be displayed', async function () {
+  if (!this.page) throw new Error('Browser page not initialized.');
+  const err =
+    (await this.page.$('[data-test="error"]')) || (await this.page.$('.error-message-container'));
+  expect(err).not.toBeNull();
+});
+
+Then('the login result should be {string}', async function (result) {
+  if (!this.page) throw new Error('Browser page not initialized.');
+  if (result === 'success') {
+    const dashboardSelector = siteConfig.selectors.dashboard || '.inventory_list';
+    await this.page.waitForSelector(dashboardSelector, { timeout: 10000 });
+    const el = await this.page.$(dashboardSelector);
+    expect(el).not.toBeNull();
   } else {
-    messageElement = await this.page.$('.success-message');
-    if (!messageElement) {
-      messageElement = await this.page.$('.alert-success');
-    }
+    const err =
+      (await this.page.$('[data-test="error"]')) || (await this.page.$('.error-message-container'));
+    expect(err).not.toBeNull();
   }
-
-  expect(messageElement).not.toBeNull(`${messageType} message should be displayed`);
 });
 
 Then('the user should remain on the login page', async function () {
-  if (!this.page) {
-    throw new Error('Browser page not initialized. Ensure hooks are properly configured.');
-  }
-
-  const currentUrl = this.page.url();
-  expect(currentUrl).toContain('/login');
+  if (!this.page) throw new Error('Browser page not initialized.');
+  const loginBtn = await this.page.$(siteConfig.selectors.loginButton || '#login-button');
+  expect(loginBtn).not.toBeNull();
 });
 
 When('the user clicks the logout button', async function () {
@@ -203,34 +234,62 @@ When('the user clicks the logout button', async function () {
     throw new Error('Browser page not initialized. Ensure hooks are properly configured.');
   }
 
-  let logoutButton = await this.page.$('button[data-testid="logout-btn"]');
-  if (!logoutButton) {
-    logoutButton = await this.page.$('a[data-testid="logout-btn"]');
+  const candidates = [];
+  if (siteConfig.selectors && siteConfig.selectors.logoutButton)
+    candidates.push(siteConfig.selectors.logoutButton);
+  candidates.push(
+    '#logout_sidebar_link',
+    'button[data-testid="logout-btn"]',
+    'a[data-testid="logout-btn"]'
+  );
+
+  // If logout is hidden in a menu, try opening the menu first
+  const menuBtnSel =
+    siteConfig.selectors && siteConfig.selectors.menuButton
+      ? siteConfig.selectors.menuButton
+      : '#react-burger-menu-btn';
+  const menuBtn = this.page.locator(menuBtnSel).first();
+  if ((await menuBtn.count()) > 0) {
+    await menuBtn.click().catch(() => {});
   }
 
-  if (!logoutButton) {
-    throw new Error('Logout button not found.');
+  let clicked = false;
+  for (const sel of candidates) {
+    if (!sel) continue;
+    const locator = this.page.locator(sel).first();
+    if ((await locator.count()) === 0) continue;
+    // Try a normal click first, fall back to forced click if element is outside viewport
+    try {
+      await locator.scrollIntoViewIfNeeded();
+      await locator.click({ timeout: 10000 });
+      clicked = true;
+      break;
+    } catch (e) {
+      try {
+        await locator.click({ force: true });
+        clicked = true;
+        break;
+      } catch (err) {
+        // continue to next candidate
+      }
+    }
   }
 
-  await logoutButton.click();
+  if (!clicked) throw new Error('Logout button not found or could not be clicked.');
 });
 
 Then('the user should be logged out', async function () {
-  if (!this.page) {
-    throw new Error('Browser page not initialized. Ensure hooks are properly configured.');
-  }
-
-  await this.page.waitForNavigation({ timeout: 30000 }).catch(() => {});
-  await this.page.waitForLoadState('networkidle');
+  if (!this.page) throw new Error('Browser page not initialized.');
+  // After logout, ensure login button is visible
+  await this.page.waitForSelector(siteConfig.selectors.loginButton || '#login-button', {
+    timeout: 10000,
+  });
 });
 
 Then('the login page should be displayed', async function () {
-  if (!this.page) {
-    throw new Error('Browser page not initialized. Ensure hooks are properly configured.');
-  }
-
-  const currentUrl = this.page.url();
-  expect(currentUrl).toContain('/login');
+  if (!this.page) throw new Error('Browser page not initialized.');
+  const loginBtn = await this.page.$(siteConfig.selectors.loginButton || '#login-button');
+  expect(loginBtn).not.toBeNull();
 });
 
 When('the user checks the {string} checkbox', async function (checkboxLabel) {

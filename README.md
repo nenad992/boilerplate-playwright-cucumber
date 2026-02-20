@@ -2,6 +2,11 @@
 
 A comprehensive, production-ready end-to-end testing boilerplate combining **Playwright** with **Cucumber** for Behavior-Driven Development (BDD). This framework provides a complete testing solution with support for multiple browsers, environments, and sites.
 
+Important notes:
+
+- This repository is configured by default to use the public demo site https://www.saucedemo.com as an example application for getting started. Saucedemo is a dummy/demo site; credentials and behavior are for testing and demonstration only.
+- Scheduled GitHub Actions runs (cron) have been removed from the default workflow in this boilerplate. If you want CI to run on a schedule in your repository, re-add a `schedule` trigger to `.github/workflows/ci.yml` and configure secrets as needed.
+
 ![Node Version](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen)
 ![npm Version](https://img.shields.io/badge/npm-%3E%3D9.0.0-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-blue)
@@ -195,6 +200,8 @@ module.exports = {
     dashboard: true,
   },
 };
+
+If you want to run tests against a different application, update the `baseUrl`, credentials, and selectors in the site config files. This boilerplate defaults to Saucedemo for quick experimentation; replace values before using against real systems.
 ```
 
 ## 🧪 Writing Tests

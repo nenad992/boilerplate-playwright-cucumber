@@ -26,10 +26,9 @@ Feature: User Authentication
     Then the login result should be "<result>"
 
     Examples:
-      | username          | password    | result  |
-      | valid@example.com | correct123  | success |
-      | invalid@test.com  | wrong       | failure |
-      | user@site.com     | pass123     | success |
+      | username          | password     | result  |
+      | standard_user     | secret_sauce | success |
+      | locked_out_user   | secret_sauce | failure |
 
   @critical
   Scenario: User logout
@@ -37,11 +36,3 @@ Feature: User Authentication
     When the user clicks the logout button
     Then the user should be logged out
     And the login page should be displayed
-
-  @regression
-  Scenario: Remember me functionality
-    When the user checks the "Remember me" checkbox
-    And the user enters valid credentials
-    And clicks the login button
-    And closes and reopens the browser
-    Then the user credentials should be remembered

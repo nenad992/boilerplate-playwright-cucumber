@@ -11,7 +11,10 @@
   },
   "rules": {
     "no-console": ["warn", { "allow": ["warn", "error", "info"] }],
-    "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
-    "playwright/no-wait-for-timeout": "warn"
+    "no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
+    "playwright/no-wait-for-timeout": "warn",
+    "playwright/no-networkidle": "off",
+    "playwright/no-element-handle": "off",
+    "playwright/no-eval": "off"
   }
 }

@@ -63,7 +63,7 @@ When('clicks the edit profile button', async function () {
     throw new Error('Browser page not initialized. Ensure hooks are properly configured.');
   }
 
-  let editButton = await this.page.getByRole('button', { name: /edit profile/i });
+  let editButton = this.page.getByRole('button', { name: /edit profile/i });
   if (!editButton) {
     editButton = await this.page.$('[data-testid="edit-profile-btn"]');
   }
@@ -101,7 +101,7 @@ When('saves the changes', async function () {
     throw new Error('Browser page not initialized. Ensure hooks are properly configured.');
   }
 
-  let saveButton = await this.page.getByRole('button', { name: /save/i });
+  let saveButton = this.page.getByRole('button', { name: /save/i });
   if (!saveButton) {
     saveButton = await this.page.$('button[type="submit"]');
   }
@@ -167,9 +167,9 @@ When('clicks on change password', async function () {
     throw new Error('Browser page not initialized. Ensure hooks are properly configured.');
   }
 
-  let changePasswordBtn = await this.page.getByRole('button', { name: /change password/i });
+  let changePasswordBtn = this.page.getByRole('button', { name: /change password/i });
   if (!changePasswordBtn) {
-    changePasswordBtn = await this.page.getByRole('link', { name: /change password/i });
+    changePasswordBtn = this.page.getByRole('link', { name: /change password/i });
   }
 
   if (!changePasswordBtn) {
@@ -309,9 +309,9 @@ When('clicks on activity log', async function () {
     throw new Error('Browser page not initialized. Ensure hooks are properly configured.');
   }
 
-  let activityBtn = await this.page.getByRole('button', { name: /activity log/i });
+  let activityBtn = this.page.getByRole('button', { name: /activity log/i });
   if (!activityBtn) {
-    activityBtn = await this.page.getByRole('link', { name: /activity log/i });
+    activityBtn = this.page.getByRole('link', { name: /activity log/i });
   }
 
   if (!activityBtn) {
@@ -394,7 +394,7 @@ When('saves preferences', async function () {
     throw new Error('Browser page not initialized. Ensure hooks are properly configured.');
   }
 
-  let saveBtn = await this.page.getByRole('button', { name: /save preferences/i });
+  let saveBtn = this.page.getByRole('button', { name: /save preferences/i });
   if (!saveBtn) {
     saveBtn = await this.page.$('button[type="submit"]');
   }

@@ -1,11 +1,13 @@
 // Site 2 Configuration - Alternative Application
 module.exports = {
   name: 'site2',
-  baseUrl: process.env.SITE2_URL || 'https://site2.example.com',
-  apiUrl: process.env.SITE2_API_URL || 'https://api2.example.com',
+  // Secondary site defaulting to the same demo application so examples run out-of-the-box
+  baseUrl: process.env.SITE2_URL || 'https://www.saucedemo.com',
+  apiUrl: process.env.SITE2_API_URL || '',
   credentials: {
-    username: process.env.SITE2_USERNAME || 'user@site2.com',
-    password: process.env.SITE2_PASSWORD || 'password456',
+    // Use a different demo account for variation if needed
+    username: process.env.SITE2_USERNAME || 'problem_user',
+    password: process.env.SITE2_PASSWORD || 'secret_sauce',
   },
   features: {
     auth: true,
@@ -15,8 +17,14 @@ module.exports = {
   },
   // Site-specific selectors or configurations
   selectors: {
-    loginButton: '[class="btn-login"]',
-    username: 'input[name="email"]',
-    password: 'input[name="pwd"]',
+    username: '#user-name',
+    password: '#password',
+    loginButton: '#login-button',
+    dashboard: '.inventory_list',
+    productItem: '.inventory_item',
+    productTitle: '.title',
+    menuButton: '#react-burger-menu-btn',
+    logoutButton: '#logout_sidebar_link',
+    sortSelect: '.product_sort_container',
   },
 };

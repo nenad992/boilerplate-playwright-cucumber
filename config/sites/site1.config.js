@@ -1,11 +1,13 @@
 // Site 1 Configuration - Main Application
 module.exports = {
   name: 'site1',
-  baseUrl: process.env.SITE1_URL || 'https://site1.example.com',
-  apiUrl: process.env.SITE1_API_URL || 'https://api1.example.com',
+  // Defaulting to the example dummy site (Sauce Demo) for the boilerplate.
+  baseUrl: process.env.SITE1_URL || 'https://www.saucedemo.com',
+  apiUrl: process.env.SITE1_API_URL || '',
   credentials: {
-    username: process.env.SITE1_USERNAME || 'user@site1.com',
-    password: process.env.SITE1_PASSWORD || 'password123',
+    // Known demo credentials for Saucedemo
+    username: process.env.SITE1_USERNAME || 'standard_user',
+    password: process.env.SITE1_PASSWORD || 'secret_sauce',
   },
   features: {
     auth: true,
@@ -15,8 +17,16 @@ module.exports = {
   },
   // Site-specific selectors or configurations
   selectors: {
-    loginButton: '[data-testid="login-btn"]',
-    username: '#username',
+    // Saucedemo selectors
+    username: '#user-name',
     password: '#password',
+    loginButton: '#login-button',
+    // Inventory / dashboard selectors
+    dashboard: '.inventory_list',
+    productItem: '.inventory_item',
+    productTitle: '.title',
+    menuButton: '#react-burger-menu-btn',
+    logoutButton: '#logout_sidebar_link',
+    sortSelect: '.product_sort_container',
   },
 };
